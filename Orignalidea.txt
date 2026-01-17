@@ -1,0 +1,43 @@
+- Press button in VS Code like "Submit Design"
+- Pushes to github repo
+- Repo detects push, runs action
+- Action sends POST request to Pi5
+- Pi5 daemon receives post request
+- daemon sends request to project owner or other approved third party, to approve via a TOTP code or Passkey
+- If approved, continue
+- Parse build script for project
+- Put FIRRTL code through Firtool (or libCIRCT*) to generate Verilog
+- Put Verilog through Verilator to generate C++ simulator
+- Compile C++ simulator & C++ GoogleTest tests defined by script
+- Run tests, if all pass continue
+- Check constaints for target FPGA (selected by build script)
+- Put code through Yosys, NextPNR, and IceStorm Project to generate FPGA bitstream
+- Flash bitstream to FPGA connected to Pi5
+- Run it
+- Send results back to VS Code
+
+Libraries/tools used
+- CIRCT - FIRRTL -> Verilog generation
+- Clang  - C++ Test compilation
+-  C++ Boost - Daemon HTTP server
+- GitHub Actions - Trigger 
+- Yosys - Synthesization for FPGA
+- NextPNR - Placing & Routing
+- IceStorm - Bitstream generation and flashing
+- VS Code SDK - Interface
+- GoogleTest - C++ tests
+- libc++/libc++abi/libc/system libraries -- Main code
+- Rust - Approval App
+- notify-rust -- Rust notifications
+- egui - Rust GUIs
+
+Setup for users
+- Install VS Code extension (for submitting and getting results)
+- Install owner/admin program (for approving stuff)
+- On Pi5, install daemon, connect it to Systemd, plugin the FPGA, put the TOTP secret in an env var (all this will be automated by a script)
+
+Server discovery
+Ill make it so that theres a code thats shared with everyone, and itll do something like "Which server is 12345, tell 192.168.1.123" and then the build server checks its code, and goes "Server 12345 is at 192.168.1.321"
+
+Approval app
+The approval service will be a tiny binary monitoring for a request, then it sends a notification to the user, and adds it to a queue in the gui app for approval, and the totp code has to be entered
